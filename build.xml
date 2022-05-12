@@ -1,0 +1,44 @@
+<project name="Dodgeball" basedir="." default="main">
+
+    <property name="src.dir" value="code"/>
+    <property name="provided.dir" value="code"/>
+    <property name="bin.dir"   value="bin"/>
+    
+    <property name="main-class" value="DodgeballMain"/>
+    
+    <target name="clean">
+        <delete dir="${bin.dir}"/>
+    </target>
+
+    <target name="compile" depends="clean">
+        <mkdir dir="${bin.dir}"/>
+        <javac includeantruntime="false"
+               destdir="${bin.dir}"
+               debug="on">
+            <src path="${src.dir}"/>
+            <src path="${provided.dir}"/>
+        </javac>
+    </target>
+
+    <target name="run" depends="compile">
+        <java fork="true"
+              classname="${main-class}"
+              classpath="${bin.dir}"/>
+    </target>
+    
+    <target name="debug" depends="compile">
+        <condition property="remoteDebugJvmArgs"
+                   value="-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5105"
+                   else="-ea">
+            <istrue value="${remoteDebug}"/>
+        </condition>
+        <java fork="true"
+              classname="${main-class}"
+              classpath="${bin.dir}">
+            <jvmarg value="${remoteDebugJvmArgs}"/>
+        </java>
+    </target>
+    
+    <target name="main" depends="run"/>
+
+</project>
