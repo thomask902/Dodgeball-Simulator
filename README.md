@@ -1,1 +1,69 @@
 # Dodgeball-Simulator
+
+The purpose of this file is to give the reader an overview of the implementation and testing strategies used to create the DodgeballManager object class, with a specific focus on the implementation and testing strategy for the constructor, hit and dodge methods. This report also explain issues which were encountered during the implementation of the class.
+An in-depth explanation of the constructor, dodge method, and hit method includes all of the logic, explanation of syntax, and other helper methods used in the implementation of this code. This also includes and explanation of overall testing strategy along with a breakdown of specific naming convention, inputs, and outputs of all junit tests used for the unit testing of each of these methods. The code for these tests will also be submitted alongside, and screenshots of the test results are included in this report.
+For the other methods, a less in-depth overview of the testing strategy is included, explaining how the DodgeballMain client program was used primarily for testing.
+
+**Implementation and Testing Strategy**
+
+DodgeballManager Constructor:
+
+Implementation: 
+The strategy for implementation for the constructor was focused on the primary data transfer which the program needed to be able to do, which was taking the string list of names, and transferring this data, in the same order, to a linked list of DodgeballNode objects. Once this process could be completed, it just needed to be called twice, once for the thrower list and first DodgeballNode, and once for the dodger list and its first DodgeballNode. 
+Knowing this, I created a “helper method”, transferListToDodgeball, to do just so. This method checks first to ensure that the string list is not empty or null, if so, throws an exception, and if not, then functions by creating a “fencepost” node with the last name in the given string list, pointing that to null in our new dodgeballNode list, and pointing our first node pointer for the DodgeballNode list to that. It then checks to see if there is more than one element in the string list, and if there isn’t we are done, if there is, it adds them in one by one working from the second last to the first, each time pointing them to the node which points to the rest of the list, and pointing the first node pointer to the one which was just created. This way it works no matter the length of the array. 
+The first DodgeballNode object pointing to our newly created linked list is returned at the end of this process, and assigned to the throwerFirstNode and dodgerFirstNode fields respectively.
+
+Testing Strategy: 
+
+The testing strategy for this method, similar to the dodge and hit methods, was two-fold. First, I used the DodgeballMain class to ensure that a basic, general case could be handled, with all of the methods working in tandem on very digestible standard data. Once this was tested, I created a host of JUnit tests, each named testConstructor*****(), with the asterisks being replaced by whatever was the case which I was testing. The focus of these JUnit tests was to ensure that all basic functionality of the constructor used in DodgeballMain could also consistently work with standard data, and that it could also handle extreme and exception throwing cases, such as having empty string lists as input. Below is a list of JUnit tests emplored to do so, along with their input, expected output, and a screenshot of the resulting output to terminal in eclipse. All other methods except hit and dodge have already been tested and are functioning properly.
+1.	testConstructorName - This takes standard length lists of names for throwers and dodgers as inputs and ensures the output is a proper dodgeball manager object, and that the name field is correct.
+2.	testConstructorScore - This takes standard length lists of names for throwers and dodgers as inputs and ensures the output is a proper dodgeball manager object, and that the score field is correct, and is zero.
+3.	testConstructorEmptyList - Takes two string lists for input but one of them is empty, this should throw IllegalArgumentException as a result.
+4.	testContructorNullList - Takes two string lists for input but one of them is null, this should throw IllegalArgumentException as a result.
+5.	testConstructorLengthOfOne - This takes two string lists but one of them has a length of one, ensures the constructor only creates one node for a list with a length of one and no extra nodes are created.
+6.	testConstructorNameLong - This takes two string lists as input but one is very long, insures constructor creates a proper dodgeball manager object which brings in all of the names.
+ 
+
+dodge Method:
+
+Implementation:
+The strategy for this method boils down to the two main functions it must complete. It must first check to ensure that the thrower and dodger name strings that have been inputted are actually a part of their respective lists, are not empty, and are not null. This is done by a helper method called checkArguments which takes the two string parameters and does just that. 
+The second functionality which must be achieved is that the player who dodged the throw must be awarded a point. For this, the helper method addPoint is called on, which takes dodgerNode and dodger name parameters and adds a point to the player in the dodgeballNode dodger linked list whose name matches the name parameter. The first dodgeballNode is then returned, which we set equal to the dodgerFirstNode.
+
+Testing Strategy:
+
+Just the same as the constructor, the dodge method could also be tested in a very limited sense through the client program, DodgeballMain, but this was a very limited example with easy and basic data. This is why I also created junit tests to ensure the functionality for standard cases is consistent with what I saw in the client program, and that the dodge method can handle extreme or exception throwing cases. Just the same as the constructor above, below is a list of JUnit tests used to test the two core functionalities mentioned in the implementation section of this method, checking the input and updating the correct player’s point total. These methods were name using convention testDodge****(), with the asterisks denoting the short form name of the specific case being tested. The results of the tests are in the photo in the constructor section. All other methods except hit have already been tested and are functioning properly.
+1.	testDodgeNotInList - this test takes two strings for input to dodge, but one of them is not in their respective list, dodge method should throw IllegalArgumentException.
+2.	testDodgeNullParameter - test takes two strings for input to dodge, but one of them is null, should throw IllegalArgumentException.
+3.	testDodgeEmptyParameter - test takes two strings for input to dodge, but one of them is empty, should throw IllegalArgumentException.
+4.	testDodgeStandardPoint - takes two names in lists for input for a dodgeball manager with standard number of players, should update the score for the respective dodger inputted.
+5.	testDodgeExtremeCase - takes two names in lists for input for a dodgeball manager with very large number of players, and dodger is very far down list, should update the score for the respective dodger inputted.
+
+hit Method:
+
+Implementation: 
+This method is very similar to the dodge method. It shares the same two steps that comprise the dodge method but has another functionality that must cover: swapping the places of the nodes in their respective thrower and dodger lists. In the same manner as the dodge method, it first calls on the checkArguments method to ensure the arguments are in their respective lists, not empty, and not null, before using the addPoint method to add a point to the thrower, instead of the dodger, as they have hit the dodger. 
+After this has been completed, it calls on the getIndex method for both the thrower and dodger, which takes a DodgeballNode and string parameter, representing one of the DodgeballNode lists and the name which we would like to get the index of, and returns an integer value representing the index. These indexes are stored in the integer variables t and d, for thrower and dodger respectively, and are used to more easily parse through the lists to get our temp variables pointing where they need to be efficiently. 
+The logic of rearranging these lists boils down to two cases for each list, one being that the player is at the front of the list, and the other being that the player is in the middle or at the back. This is because the program is essentially breaking each list into three sections, the section before the node we need, the node itself, and the nodes following. It declares “temp” DodgeballNode variables to parse through to point to the dodger and thrower which we need to move, with the variables named as such. It then declares to other “temp” DodgeballNode variables to point to the nodes following the thrower and dodger in their respective lists. These are named tTemp2 and dTemp2 respectively. These even work if the thrower or dodger was at the end of the list, due to the fact that they would just point to null which is what the list will need to point to at the end no matter what. 
+After these four variables have been declared, it checks whether or not the thrower or dodger were at the beginning of the list, and if not, declares new “temp” DodgeballNode variables to point to the node before the thrower or dodger, named tTemp1 and dTemp1, as they are before the tTemp2 and dTemp2 nodes in the list. Once all of these necessary “temp” variables have been created, the “front” or “head” of each list points to the chosen thrower/dodger in the other list, and this thrower/dodger points to the “end” or tail” of the list which it didn’t start in. In the case of the dodger/thrower being first, the first node variable for the list just points to the other dodger/thrower itself.
+
+Testing Strategy: 
+
+Just as the implementation needs to be broken down into three parts, so must the testing strategy. The DodgeballMain client program allows for a general idea of whether or not the method is functioning for a standard case, but for a method with the amount of data structure manipulation that hit has, we need unit tests to ensure each case and extreme is covered and pinpoint any areas of issue. The detection of invalid parameters must be covered comprehensibly, along with adding a point to the thrower, but the bulk of the testing is focused on the rearranging of the nodes between the list. There are three main cases that must be covered for each of the lists, the person being at the front, middle and back. All of these bases are covered in the JUnit tests listed below, all other methods have already been tested and are functioning properly, and these tests are named using the convention testHit****(), with the asterisks denoting the specific case. The results of the tests are in the photo in the constructor section.
+1.	testHitNotInList - this test takes two strings for input to hit but one of them is not in their respective list, hit method should throw IllegalArgumentException.
+2.	testHitNullParameter - test takes two strings for input to hit, but one of them is null, should throw IllegalArgumentException.
+3.	testHitEmptyParameter - test takes two strings for input to hit, but one of them is empty, should throw IllegalArgumentException.
+4.	testHitUpdateScore - test takes two strings for input which are in their respective lists, tests whether or not the score for the thrower is updated.
+5.	testHitInFront - test takes two strings as inputs, one is the name at the front of its respective list. Tests that the players have been swapped properly.
+6.	testHitBothInMiddle - test takes two strings as inputs, both neither at the front nor back of their respective lists. Tests that the players have been swapped properly.
+7.	testHitInBack - test takes two strings as inputs, one is the name at the front of its respective list. Tests that the players have been swapped properly.
+
+
+General Testing Strategy (for other methods)
+
+There is a bit of a unique situation with each of the other methods of the object class. For nearly all of these, there are not many extreme or error cases, as most of those are handled by the larger methods and constructors. The vast majority of testing with the other methods was done using the DodgeballMain client code, and a quick overview for each is  included below:
+1.	printThrowers/printDodgers - for these methods, each is backed by the same helper method, and I tested them by changing the input to dodgeballMain in the dodgeball.txt file, and insuring when the names were outputted to the console, all we there, and each time they were in the order the linked list dictated.
+2.	getMaximumScore - This method is intrinsic to the functionality of the dodgeballMain program as it is used to know when to call the printWinner function. I changed the global varaible N_SCORE a few times to ensure that this method works properly.
+3.	printWinner -  to test this I just changed the global variable N_SCORE in the client program DodgeballMain, to ensure that it was outputting the correct person, and that when I set this variable to 0 and started the program, it would throw an IllegalStateException as there would be more than one winner.
+4.	throwerContains/dodgerContains - these were tested through the DodgeballMain client program, as it prompts you for a thrower and then dodger in the list, and knowing exactly what the names were in the dodgeball.txt input file, I was able to ensure that the proper boolean is returned from the method for both the thrower and dodger contains methods.
+![image](https://user-images.githubusercontent.com/73481815/168071372-056af2a5-2efa-4906-9f79-2aab196ceb26.png)
